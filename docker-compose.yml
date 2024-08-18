@@ -1,0 +1,37 @@
+services:
+  big-api:
+    container_name: big-api
+    env_file:
+      - .env
+    build: 
+      context: .
+      target: ${ENVIRONMENT}
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - big-db
+    networks:
+      - thebigapp
+  
+  big-db:
+    container_name: big-db
+    image: postgres:13
+    environment:
+      POSTGRES_DB: ${PG_DB}
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgData:/var/lib/postgresql/data
+    networks:
+      - thebigapp
+  
+volumes:
+  pgData: {}
+
+networks:
+  thebigapp:
