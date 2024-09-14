@@ -89,3 +89,10 @@ def get_user(request, id):
     return Response(serializer.data, status=status.HTTP_200_OK)
   except Exception as e:
     return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  
+# Get current logged in user
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_current_user(request):
+  user = request.user
+  return Response(user, status=status.HTTP_200_OK)
