@@ -94,5 +94,14 @@ def get_user(request, id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_current_user(request):
-  user = request.user
-  return Response(user, status=status.HTTP_200_OK)
+  try:
+    user_id = request.user_id
+    if not user_id:
+      return Response({'error': 'Bad Request'}, status=status.HTTP_400_BAD_REQUEST)
+    user = user_repo.get_by_id(user_id)
+    if not user:
+      return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    serializer = UserSerializer(user, fields=('id', 'phone_number', 'name', 'is_active', 'is_verified'))
+    return Response(serializer.data, status=status.HTTP_200_OK)
+  except Exception as e:
+    return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

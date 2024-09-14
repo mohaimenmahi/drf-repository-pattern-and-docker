@@ -7,24 +7,24 @@ from django.conf import settings
 
 class TokenMiddleWare(MiddlewareMixin):
   user_repo = UserRepository()
-
   def process_request(self, request):
-    token = request.COOKIES.get('access_token') if settings.ENV == 'production' else request.headers.get('access_token')
-
+    token = request.COOKIES.get('access_token')
+    
     # simply do nothing if token is not present
     if not token:
       return
     
     try:
       payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-      user_id = payload['user_id']
+      user_id = payload.get('user_id')
+      phone_number = payload.get('phone_number')
 
-      user = self.user_repo.get_by_id(user_id)
+      user = self.user_repo.get(id=user_id, phone_number=phone_number)
       if not user:
         raise AuthenticationFailed('User not found')
       
-      request.user = UserSerializer(user, fields=('id', 'phone_number', 'name', 'is_active', 'is_verified')).data
+      request.user_id = user_id
     except jwt.ExpiredSignatureError:
-      raise AuthenticationFailed('Token expired')
+      return
     except jwt.InvalidTokenError:
-      raise AuthenticationFailed('Invalid token')
+      return

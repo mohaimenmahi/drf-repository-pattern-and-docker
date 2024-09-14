@@ -10,8 +10,7 @@ class IsAuthenticated(BasePermission):
   def has_permission(self, request, view):
     auth_service = AuthService(user_repo)
     
-    token = request.COOKIES.get('access_token') if settings.ENV == 'production' else request.headers.get('access_token')
-
+    token = request.COOKIES.get('access_token')
     if not token:
       return False
     
