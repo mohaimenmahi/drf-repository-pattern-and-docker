@@ -10,7 +10,10 @@ class BaseRepository:
   def get(self, **kwargs) -> T:
     return self.model.objects.get(**kwargs)
 
-  def filter(self, **kwargs) -> list[T]:
+  def filterOne(self, **kwargs) -> list[T]:
+    return self.model.objects.filter(**kwargs).first()
+  
+  def filterAll(self, **kwargs) -> list[T]:
     return self.model.objects.filter(**kwargs)
 
   def create(self, **kwargs) -> T:
