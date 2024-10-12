@@ -1,8 +1,8 @@
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework.exceptions import AuthenticationFailed
 import jwt
-from apps.users.repositories import UserRepository
-from apps.users.serializers import UserSerializer
+from apps.users.repository import UserRepository
+from apps.users.serializer import UserSerializer
 from django.conf import settings
 
 class TokenMiddleWare(MiddlewareMixin):

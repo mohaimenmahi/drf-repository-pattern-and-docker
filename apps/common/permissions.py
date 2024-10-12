@@ -1,7 +1,7 @@
 from rest_framework.permissions import BasePermission
-from apps.users.services import AuthService
+from apps.users.service import AuthService
 from rest_framework.exceptions import AuthenticationFailed
-from apps.users.repositories import UserRepository
+from apps.users.repository import UserRepository
 from rest_framework import status
 
 user_repo = UserRepository()

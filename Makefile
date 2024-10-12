@@ -26,3 +26,6 @@ create-migrations:
 
 run-migrations:
 	python3 manage.py migrate
+
+create-module:
+	python3 manage.py generate_module $(module)

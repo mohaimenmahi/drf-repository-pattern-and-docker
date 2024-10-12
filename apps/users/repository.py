@@ -1,5 +1,5 @@
-from .models import User
-from apps.base.repositories import BaseRepository
+from .model import User
+from apps.base.repository import BaseRepository
 
 class UserRepository(BaseRepository):
   def __init__(self):

@@ -1,12 +1,14 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from apps.common.permissions import IsAuthenticated
-from apps.users.services import AuthService
-from apps.users.repositories import UserRepository
+from apps.common.permissions import IsAuthenticated, HasRolePermission
+from apps.users.service import AuthService
+from apps.users.repository import UserRepository
+from apps.roles.repository import RoleRepository
 
 user_repo = UserRepository()
-auth_service = AuthService(user_repo)
+role_repo = RoleRepository()
+auth_service = AuthService(user_repo, role_repo)
 
 # Register user
 @api_view(['POST'])
@@ -51,3 +53,21 @@ def get_current_user(request):
   user_id = request.user_id
   response = auth_service.get_user_by_id(user_id)
   return response
+  
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated, HasRolePermission(role='Admin')])
+def update_user_role(request):
+  data = request.data
+  user_id = data['user_id']
+  role_id = data['role_id']
+  res = auth_service.update_user_role(user_id, role_id)
+  return res
+  
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_self_role(request):
+  data = request.data
+  user_id = request.user_id
+  role_id = data['role_id']
+  res = auth_service.update_user_role(user_id, role_id)
+  return res

@@ -3,16 +3,19 @@ import jwt
 from rest_framework.response import Response
 from datetime import datetime
 from django.conf import settings
+from django.db import transaction
 from rest_framework.exceptions import AuthenticationFailed
-from apps.base.services import BaseService
-from .repositories import UserRepository
-from .serializers import UserSerializer
+from apps.base.service import BaseService
+from .repository import UserRepository
+from apps.roles.repository import RoleRepository
+from .serializer import UserSerializer
 from apps.common.exceptions import AlreadyExistsError 
 from rest_framework import status
 
 class AuthService(BaseService):
-    def __init__(self, user_repo: UserRepository):
+    def __init__(self, user_repo: UserRepository, role_repo: RoleRepository):
       self.user_repo = user_repo
+      self.role_repo = role_repo
 
     def hash_pin(self, pin: str) -> str:
       salt = bcrypt.gensalt()
@@ -164,4 +167,27 @@ class AuthService(BaseService):
         return Response(serializer.data, status=status.HTTP_200_OK)
       except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    def update_user_role(self, user_id, role_id):
+      try:
+        user = self.user_repo.get(id=user_id)
+        if not user.role:
+          role = self.role_repo.get(id=role_id)
+          with transaction.atomic():
+            user.roles.add(role)
+            user.save()
+
+            res = {
+              'id': user.id,
+              'phone_number': user.phone_number,
+              'name': user.name,
+              'is_active': user.is_active,
+              'is_verified': user.is_verified,
+              'roles': user.roles.all()
+            }
+            return Response(res, status=status.HTTP_200_OK)
+        else:
+          raise Response({'message': 'User already has a role'}, status=status.HTTP_409_CONFLICT)
+      except Exception as e:
+        raise Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
