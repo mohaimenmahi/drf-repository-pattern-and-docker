@@ -13,3 +13,10 @@ class UserRepository(BaseRepository):
   
   def get_by_id(self, id: int) -> User:
     return self.get(id=id)
+
+  # prefetch_related is used to fetch the related objects in the same query, its for performance optimization
+  # in many to many or many to one relationships to reduce the number of queries
+  # select_related: same use, but for foreign key relationships/one-to-one relationships
+  def get_user_with_roles(self, id: int) -> User:
+    return self.model.objects.prefetch_related('roles').get(id=id)
+  

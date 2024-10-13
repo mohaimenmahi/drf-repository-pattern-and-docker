@@ -1,23 +1,41 @@
+from rest_framework.authentication import BaseAuthentication
 from rest_framework.permissions import BasePermission
-from apps.users.service import AuthService
+from apps.users.services import AuthService
 from rest_framework.exceptions import AuthenticationFailed
 from apps.users.repository import UserRepository
+from apps.roles.repository import RoleRepository
 from rest_framework import status
 
 user_repo = UserRepository()
+role_repo = RoleRepository()
+auth_service =  AuthService(user_repo, role_repo)
 
-auth_service =  AuthService(user_repo)
-
-class IsAuthenticated(BasePermission):
-  def has_permission(self, request, view):
-    auth_service = AuthService(user_repo)
-    
+class IsUserAuthenticated(BaseAuthentication):
+  def authenticate(self, request):
     token = request.COOKIES.get('access_token')
     if not token:
-      return False
-    
+      raise AuthenticationFailed('No token found')
+
     try:
       auth_service.validate_token(token)
-      return True
-    except AuthenticationFailed as e:
-      raise AuthenticationFailed(detail=str(e), code=status.HTTP_401_UNAUTHORIZED)
+      return None
+    except Exception as e:
+      raise AuthenticationFailed(str(e))
+    
+  def authenticate_header(self, request):
+    return request
+    
+
+class HasRolePermission(BasePermission):
+  def __init__(self, role):
+    self.role = role
+
+  def has_permission(self, request, view):
+    user_id = request.user_id
+    try:
+      user = user_repo.get(id=user_id)
+      if not user:
+        return False
+      return user.roles.filter(name=self.role).exists()
+    except Exception as e:
+      return False

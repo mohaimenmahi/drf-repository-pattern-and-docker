@@ -1,8 +1,8 @@
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view, permission_classes
-from apps.common.permissions import IsAuthenticated, HasRolePermission
-from apps.users.service import AuthService
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from apps.common.permissions import IsUserAuthenticated, HasRolePermission
+from apps.users.services import AuthService
 from apps.users.repository import UserRepository
 from apps.roles.repository import RoleRepository
 
@@ -42,20 +42,23 @@ def refresh_access_token(request):
 
 # Get a single user
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@authentication_classes([IsUserAuthenticated])
 def get_user(request, id):
   response = auth_service.get_user_by_id(id)
   return response
-  
+
+# get current use session 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@authentication_classes([IsUserAuthenticated])
 def get_current_user(request):
+  print('userId', request.user_id)
   user_id = request.user_id
   response = auth_service.get_user_by_id(user_id)
   return response
   
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated, HasRolePermission(role='Admin')])
+@authentication_classes([IsUserAuthenticated])
+@permission_classes([HasRolePermission(role='Admin')])
 def update_user_role(request):
   data = request.data
   user_id = data['user_id']
@@ -64,7 +67,7 @@ def update_user_role(request):
   return res
   
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@authentication_classes([IsUserAuthenticated])
 def update_self_role(request):
   data = request.data
   user_id = request.user_id
