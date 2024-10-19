@@ -54,6 +54,11 @@ COOKIE_SETTINGS = {
   'SAMESITE': 'Lax' if ENV == 'production' else 'None',
 }
 
+CSRF_TRUSTED_ORIGINS = ['http://localhost:6280']
+CSRF_COOKIE_SECURE = False  # Set to True in production
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'None'  # For cross-origin requests in development
+
 # Application definition
 
 INSTALLED_APPS = [

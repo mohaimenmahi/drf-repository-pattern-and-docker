@@ -63,12 +63,11 @@ class AuthService(BaseService):
         raise AuthenticationFailed('User is not verified')
       
       if user and self.verify_pin(pin, user.pin):
-        access_token = self.generate_access_token(user)
-        refresh_token = self.generate_refresh_token(user)
+        user_data = UserSerializer(user, fields=('id', 'phone_number', 'name', 'is_active', 'is_verified')).data
+        access_token = self.generate_access_token(user_data)
+        refresh_token = self.generate_refresh_token(user_data)
 
-        responseUser = UserSerializer(user, fields=('id', 'phone_number', 'name', 'is_active', 'is_verified')).data
-
-        response = Response(responseUser, status=status.HTTP_200_OK)
+        response = Response(user_data, status=status.HTTP_200_OK)
 
         response.set_cookie(
           'access_token', 
@@ -90,8 +89,8 @@ class AuthService(BaseService):
     
     def generate_access_token(self, user):
       payload = {
-        'user_id': user.id,
-        'phone_number': user.phone_number,
+        'user_id': user['id'],
+        'phone_number': user['phone_number'],
         'exp': datetime.now() + settings.JWT_SETTINGS.get('ACCESS_TOKEN_LIFETIME'),
         'iat': datetime.now()
       }
@@ -100,8 +99,8 @@ class AuthService(BaseService):
     
     def generate_refresh_token(self, user):
       payload = {
-        'user_id': user.id,
-        'phone_number': user.phone_number,
+        'user_id': user['id'],
+        'phone_number': user['phone_number'],
         'exp': datetime.now() + settings.JWT_SETTINGS.get('REFRESH_TOKEN_LIFETIME'),
         'iat': datetime.now()
       }
