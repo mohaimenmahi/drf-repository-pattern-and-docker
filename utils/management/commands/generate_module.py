@@ -14,7 +14,8 @@ class Command(BaseCommand):
     # Define file and directory structure
     structure = {
         'migrations': ['__init__.py'],
-        '': ['__init__.py', 'apps.py', 'model.py', 'repository.py', 'serializer.py', 'service.py', 'urls.py', 'views.py']
+        'serializers': ['serializer.py'],
+        '': ['__init__.py', 'apps.py', 'model.py', 'repository.py', 'service.py', 'urls.py', 'views.py']
     }
 
     module = module_name[0].upper() + module_name[1:-1]
@@ -28,11 +29,11 @@ class Command(BaseCommand):
           with open(file_path, 'w') as f:
           # Add default content based on file type
             if file == 'apps.py':
-              f.write(f'from django.apps import AppConfig\n\nclass {module}Config(AppConfig):\n    name = "apps.{module_name}"\n')
+              f.write(f'from django.apps import AppConfig\n\nclass {module}Config(AppConfig):\n  name = "apps.{module_name}"\n')
             if file == 'urls.py':
               f.write('from django.urls import path\n\nurlPatterns = []\n')
             elif file == 'model.py':
-              f.write(f'from apps.base.model import BaseModel\nfrom django.db import model\n\nclass {module}(BaseModel):\n    pass\n')
+              f.write(f'from apps.base.model import BaseModel\nfrom django.db import models\n\nclass {module}(BaseModel):\n  pass\n')
             elif file == 'repository.py':
               f.write(f'from apps.base.repository import BaseRepository\n'
                       f'from .model import {module}\n\n'
@@ -40,8 +41,6 @@ class Command(BaseCommand):
                       f'  def __init__(self):\n'
                       f'    super().__init__({module})\n'
                     )
-            elif file == 'serializer.py':
-              f.write(f'from rest_framework import serializers\n\nclass {module}Serializer(serializers.ModelSerializer):\n    pass\n')
             elif file == 'service.py':
               module_lower = module.lower()
               f.write(f'from apps.base.service import BaseService\n'

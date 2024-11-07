@@ -18,5 +18,8 @@ class UserRepository(BaseRepository):
   # in many to many or many to one relationships to reduce the number of queries
   # select_related: same use, but for foreign key relationships/one-to-one relationships
   def get_user_with_roles(self, id: int) -> User:
-    return self.model.objects.prefetch_related('roles').get(id=id)
+    try:
+      return self.model.objects.prefetch_related('roles').get(id=id)
+    except self.model.DoesNotExist:
+      return None
   

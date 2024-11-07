@@ -162,8 +162,8 @@ class AuthService(BaseService):
     
     def update_user_role(self, user_id, role_id):
       try:
-        user = self.user_repo.get(id=user_id)
-        if not user.role:
+        user = self.user_repo.get_user_with_roles(user_id)
+        if not user.roles.exists():
           role = self.role_repo.get(id=role_id)
           with transaction.atomic():
             user.roles.add(role)
@@ -175,7 +175,7 @@ class AuthService(BaseService):
               'name': user.name,
               'is_active': user.is_active,
               'is_verified': user.is_verified,
-              'roles': user.roles.all()
+              'roles': list(user.roles.values())
             }
             return Response(res, status=status.HTTP_200_OK)
         else:

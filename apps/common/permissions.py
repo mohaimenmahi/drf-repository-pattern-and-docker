@@ -25,10 +25,17 @@ class IsUserAuthenticated(BaseAuthentication):
   def authenticate_header(self, request):
     return request
     
-
 class HasRolePermission(BasePermission):
-  def __init__(self, role):
+  def __init__(self, role=None):
     self.role = role
+
+  @classmethod
+  def with_role(cls, role):
+    class RoleSpecificPermission(cls):
+      def __init__(self):
+        super().__init__(role=role)
+        
+    return RoleSpecificPermission
 
   def has_permission(self, request, view):
     user_id = request.user_id
